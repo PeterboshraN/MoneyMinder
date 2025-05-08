@@ -1,4 +1,6 @@
 import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Goal {
     private int goalId;
@@ -6,12 +8,20 @@ public class Goal {
     private double targetAmount;
     private double savedAmount;
     private Date deadline;
+    private List<GoalCompletionListener> listeners = new ArrayList<>();
+
+    public void addListener(GoalCompletionListener listener) {
+        listeners.add(listener);
+    }
 
     public void updateProgress(double amount) {
         if (amount < 0) {
             throw new IllegalArgumentException("Savings amount cannot be negative");
         }
         this.savedAmount += amount;
+        if (isCompleted()) {
+            listeners.forEach(listener -> listener.onGoalCompleted(this));
+        }
     }
     public double getProgress() {
         return savedAmount;

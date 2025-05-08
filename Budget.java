@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class Budget {
+public class Budget implements TransactionListener {
     private int budgetId;
     private String category;
     private double limit;
@@ -18,6 +18,12 @@ public class Budget {
     }
     public void addTransaction(double amount) {
         this.transactions.add(amount);
+    }
+    @Override
+    public void onTransactionAdded(Transaction transaction) {
+        if (transaction.getCategory().equals(category)) {
+            addTransaction(transaction.getAmount());
+        }
     }
     public boolean isExceeded() {
         return getCurrentSpending() > limit;
