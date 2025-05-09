@@ -1,0 +1,57 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.io.Serializable;
+
+public class Budget implements TransactionListener, Serializable {
+    private int budgetId;
+    private String category;
+    private double limit;
+    private List<Double> transactions;
+
+    public Budget() {
+        this.transactions = new ArrayList<>();
+    }
+    public void setLimit(double limit) {
+        this.limit = limit;
+    }
+    public void adjustBudget(double amount) {
+        this.limit += amount;
+    }
+    public void addTransaction(double amount) {
+        this.transactions.add(amount);
+    }
+    @Override
+    public void onTransactionAdded(Transaction transaction) {
+        if (transaction.getCategory().equals(category)) {
+            addTransaction(transaction.getAmount());
+        }
+    }
+    public boolean isExceeded() {
+        return getCurrentSpending() > limit;
+    }
+    public double getCurrentSpending() {
+        return transactions.stream().mapToDouble(Double::doubleValue).sum();
+    }
+    public double getRemainingBudget() {
+        return limit - getCurrentSpending();
+    }
+
+    public int getBudgetId() {
+        return budgetId;
+    }
+    public void setBudgetId(int budgetId) {
+        this.budgetId = budgetId;
+    }
+    public String getCategory() {
+        return category;
+    }
+    public void setCategory(String category) {
+        this.category = category;
+    }
+    public double getLimit() {
+        return limit;
+    }
+    public List<Double> getTransactions() {
+        return new ArrayList<>(transactions);
+    }
+}
