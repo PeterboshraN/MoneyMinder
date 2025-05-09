@@ -1,11 +1,14 @@
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class User {
+public class User implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Long id;
     private String username;
     private String email;
+    private EmailStrategy emailStrategy;
     private PasswordStrategy passwordStrategy;
     private String password;
     private LocalDateTime createdAt;
@@ -21,11 +24,13 @@ public class User {
         this.goals = new ArrayList<>();
         this.createdAt = LocalDateTime.now();
         this.passwordStrategy = new BasicPasswordStrategy();
+        this.emailStrategy = new BasicEmailStrategy();
     }
-    public User(String username, String email, String password, PasswordStrategy passwordStrategy) {
+    public User(String username, String email, EmailStrategy emailStrategy, String password, PasswordStrategy passwordStrategy) {
         this();
         this.username = username;
-        this.email = email;
+        this.emailStrategy = emailStrategy;
+        setEmail(email);
         this.passwordStrategy = passwordStrategy;
         setPassword(password);
     }
@@ -57,6 +62,7 @@ public class User {
     }
 
     public void setEmail(String email) {
+        emailStrategy.validate(email);
         this.email = email;
     }
 

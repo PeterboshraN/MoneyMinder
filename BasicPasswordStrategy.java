@@ -1,17 +1,21 @@
-public class BasicPasswordStrategy implements PasswordStrategy {
+import java.io.Serializable;
+
+public class BasicPasswordStrategy implements PasswordStrategy, Serializable {
+    private static final long serialVersionUID = 1L;
+    
     @Override
     public void validate(String password) {
+        if (password == null || password.isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty.");
+        }
         if (password.length() < 8) {
-            throw new IllegalArgumentException("Password must be at least 8 characters long");
+            throw new IllegalArgumentException("Password must be at least 8 characters long.");
         }
         if (!password.matches(".*[A-Z].*")) {
-            throw new IllegalArgumentException("Password must contain at least one uppercase letter");
+            throw new IllegalArgumentException("Password must contain at least one uppercase letter.");
         }
-        if (!password.matches(".*[a-z].*")) {
-            throw new IllegalArgumentException("Password must contain at least one lowercase letter");
-        }
-        if (!password.matches(".*[0-9].*")) {
-            throw new IllegalArgumentException("Password must contain at least one number");
+        if (!password.matches(".*\\d.*")) {
+            throw new IllegalArgumentException("Password must contain at least one number.");
         }
     }
 }

@@ -1,39 +1,147 @@
+import java.io.*;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Scanner;
 import java.util.List;
+import java.util.Scanner;
 
 public class FinanceManager {
     private static User user;
+    static List<User> users;
     private static Scanner scanner = new Scanner(System.in);
-    
+
     public static void main(String[] args) {
-        initializeUser();
-        showMainMenu();
+        loadUsers();
+
+        while (true) {
+            showAuthMenu();
+
+            if (user == null) {
+                break; 
+            }
+
+            showMainMenu();
+            user = null; 
+        }
+
+        saveUsers();
+        System.out.println("Goodbye! 👋");
     }
 
-    private static void initializeUser() {
+    private static void loadUsers() {
+        File file = new File("users.db");
+        if (file.exists()) {
+            try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+                users = (List<User>) in.readObject();
+            } catch (FileNotFoundException e) {
+                users = new ArrayList<>();
+            } catch (IOException | ClassNotFoundException e) {
+                System.out.println("Error loading users: " + e.getMessage());
+                users = new ArrayList<>();
+            }
+        } else {
+            users = new ArrayList<>();
+        }
+    }
+
+    private static void saveUsers() {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("users.db"))) {
+            out.writeObject(users);
+        } catch (IOException e) {
+            System.out.println("Error saving users: " + e.getMessage());
+        }
+    }
+
+    private static void showAuthMenu() {
+        boolean inAuthMenu = true;
+
+        while (inAuthMenu && user == null) {
+            System.out.println("\n===== Welcome to Finance Manager =====");
+            System.out.println("1. Sign Up");
+            System.out.println("2. Sign In");
+            System.out.println("3. Exit");
+            System.out.print("Choose an option: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1:
+                    handleSignUp();
+                    break;
+                case 2:
+                    handleSignIn();
+                    break;
+                case 3:
+                    inAuthMenu = false;
+                    break;
+                default:
+                    System.out.println("Invalid option! Try again.");
+            }
+        }
+    }
+
+    private static void handleSignUp() {
+        System.out.println("\n=== Sign Up ===");
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+
+        System.out.print("Enter email: ");
+        String email = scanner.nextLine();
+
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        EmailStrategy emailStrategy = new BasicEmailStrategy();
         PasswordStrategy passwordStrategy = new BasicPasswordStrategy();
-        user = new User("user123", "user@finance.com", "SecurePass123!", passwordStrategy);
-        System.out.println("✅ User initialized successfully!\n");
+
+        try {
+            User newUser = new User(username, email, emailStrategy, password, passwordStrategy);
+            new SignUp(newUser);
+            saveUsers();
+            System.out.println("✅ Sign up successful! Please sign in.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ Sign up failed: " + e.getMessage());
+        }
+    }
+
+    private static void handleSignIn() {
+        System.out.println("\n=== Sign In ===");
+        System.out.print("Enter username or email: ");
+        String identifier = scanner.nextLine();
+
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        for (User u : users) {
+            if (u.getUsername().equals(identifier) || u.getEmail().equals(identifier)) {
+                if (u.getPassword().equals(password)) {
+                    user = u;
+                    System.out.println("✅ Sign in successful! Welcome, " + u.getUsername());
+                    return;
+                }
+            }
+        }
+
+        System.out.println("❌ Invalid credentials or user not found.");
     }
 
     private static void showMainMenu() {
         boolean running = true;
-        
-        while(running) {
-            System.out.println("\n===== Personal Finance Manager =====");
+
+        while (running) {
+            System.out.println("\n===== Finance Manager Dashboard =====");
             System.out.println("1. Add Transaction");
             System.out.println("2. Create Budget");
             System.out.println("3. Create Goal");
             System.out.println("4. View Financial Summary");
             System.out.println("5. Update Goal Progress");
-            System.out.println("6. Exit");
+            System.out.println("6. Log Out");
             System.out.print("Choose an option: ");
-            
-            int choice = scanner.nextInt();
-            scanner.nextLine(); 
 
-            switch(choice) {
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
                 case 1:
                     addTransaction();
                     break;
@@ -51,14 +159,13 @@ public class FinanceManager {
                     break;
                 case 6:
                     running = false;
-                    System.out.println("\nGoodbye! 👋");
+                    System.out.println("\n✅ Logged out successfully!");
                     break;
                 default:
                     System.out.println("Invalid option! Try again.");
             }
         }
     }
-
     private static void addTransaction() {
         System.out.println("\n=== New Transaction ===");
         System.out.print("Category: ");
