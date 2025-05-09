@@ -168,7 +168,8 @@ public class FinanceManager {
             System.out.println("3. Create Goal");
             System.out.println("4. View Financial Summary");
             System.out.println("5. Update Goal Progress");
-            System.out.println("6. Log Out");
+            System.out.println("6. Set Reminder");
+            System.out.println("7. Log Out");
             System.out.print("Choose an option: ");
 
             int choice = scanner.nextInt();
@@ -191,12 +192,16 @@ public class FinanceManager {
                     updateGoalProgress();
                     break;
                 case 6:
+                    setReminder(); // New method
+                    break;
+                case 7:
                     running = false;
                     System.out.println("\nLogged out successfully!");
                     break;
                 default:
                     System.out.println("Invalid option! Try again.");
             }
+            checkReminders();
         }
     }
     private static void addTransaction() {
@@ -314,6 +319,42 @@ public class FinanceManager {
                 selectedGoal.getProgressPercentage());
         } catch(IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void setReminder() {
+        System.out.println("\n=== Set Reminder ===");
+        Reminder reminder = new Reminder();
+
+        try {
+            System.out.print("Reminder Title (e.g., Pay Electricity Bill): ");
+            String title = scanner.nextLine();
+            reminder.setTitle(title);
+
+            System.out.print("Reminder Date (YYYY-MM-DD): ");
+            String date = scanner.nextLine();
+
+            System.out.print("Reminder Time (HH:MM): ");
+            String time = scanner.nextLine();
+
+            reminder.setDateTime(date, time);
+
+            user.addReminder(reminder);
+            saveUsers();
+            System.out.println("Reminder set successfully!");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void checkReminders() {
+        LocalDateTime now = LocalDateTime.now();
+        for (Reminder reminder : user.getReminders()) {
+            if (!reminder.isNotified() && reminder.getDateTime().isBefore(now)) {
+                System.out.println("\n📢 Reminder: " + reminder.getTitle() + " is due!");
+                reminder.setNotified(true);
+                saveUsers();
+            }
         }
     }
 }

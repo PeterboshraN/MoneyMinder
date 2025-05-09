@@ -17,6 +17,7 @@ public class User implements Serializable {
     private List<Budget> budgets;
     private List<Goal> goals;
     private List<TransactionListener> transactionListeners = new ArrayList<>();
+    private List<Reminder> reminders = new ArrayList<>();
 
     public User() {
         this.transactions = new ArrayList<>();
@@ -126,5 +127,13 @@ public class User implements Serializable {
 
     public void addGoal(Goal goal) {
         this.goals.add(goal);
+    }
+    
+    public List<Reminder> getReminders() {
+        return reminders;
+    }
+
+    public void addReminder(Reminder reminder) {
+        reminders.add(reminder);
     }
 }
