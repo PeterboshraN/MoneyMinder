@@ -1,8 +1,14 @@
-import java.io.Serializable;
-
-public class BasicPasswordStrategy implements PasswordStrategy, Serializable {
+/**
+ * Basic implementation of PasswordStrategy for validating passwords.
+ */
+public class BasicPasswordStrategy implements PasswordStrategy {
     private static final long serialVersionUID = 1L;
     
+    /**
+     * Validates the given password.
+     * @param password The password to validate
+     * @throws IllegalArgumentException if the password is invalid
+     */
     @Override
     public void validate(String password) {
         if (password == null || password.isEmpty()) {
